@@ -1,7 +1,0 @@
-# run program using pytest using command :
-# pytest program_file.py::function-to-test
-
-# when running the line by line profiler use kernprof -l -v program.py in current python environment on command line
-
-# For using the memory profile import it in the program as mprofile and then run following command 
-# mprof run particle.py --include-children

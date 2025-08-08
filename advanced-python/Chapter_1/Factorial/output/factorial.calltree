@@ -1,0 +1,67 @@
+event: ns : Nanoseconds
+events: ns
+summary: 38019958
+fl=factorial.py
+fn=<module>
+1 1708
+cfl=factorial.py
+cfn=benchmark
+calls=1 24
+1 38016250
+
+fl=factorial.py
+fn=factorial
+5 37743205
+cfl=factorial.py
+cfn=factorial
+calls=187250 5
+5 37597966
+
+fl=factorial.py
+fn=taylor_exp
+11 81375
+cfl=factorial.py
+cfn=factorial
+calls=500 5
+11 26292375
+
+fl=factorial.py
+fn=taylor_sin
+14 134342
+cfl=factorial.py
+cfn=factorial
+calls=250 5
+14 11450830
+cfl=~
+cfn=<method 'append' of 'list' objects>
+calls=500 0
+14 47911
+
+fl=factorial.py
+fn=benchmark
+24 9417
+cfl=factorial.py
+cfn=taylor_exp
+calls=1 11
+24 26373750
+cfl=factorial.py
+cfn=taylor_sin
+calls=1 14
+24 11633083
+
+fl=~
+fn=<built-in method builtins.exec>
+0 2000
+cfl=factorial.py
+cfn=<module>
+calls=1 1
+0 38017958
+
+fl=~
+fn=<method 'append' of 'list' objects>
+0 47911
+
+fl=~
+fn=<method 'disable' of '_lsprof.Profiler' objects>
+0 10625
+

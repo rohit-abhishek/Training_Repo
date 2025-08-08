@@ -1,5 +1,0 @@
-Create .out file using cProfiler using command as - 
-python -m cProfile -s tottime -o taylor_profiler.out taylor_.py  
-
-The using pyprof2calltree package (install using pip) create call tree which will create tree file consumable for qcachegrind application
-pyprof2calltree -i taylor_profiler.out -o taylor_profiler.calltree

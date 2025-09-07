@@ -31,6 +31,9 @@ __pycache__/
 
 
 # no need to send any files created during performance tuning 
+Personal Assistant/
+Personal Assistant/*
+test/*
 /advanced-python/Chapter_2/data/joblib/*
 /advanced-python/Chapter_1/Particle_Simulation/tests/data/*
 /hands-on-ml/SELF/DATA/Chapter3/spam/ham/*

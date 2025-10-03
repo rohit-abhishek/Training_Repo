@@ -14,11 +14,8 @@ __pycache__/
 *.tgz
 *.bz2
 
-# db files 
+# exclude database file 
 *.db
-
-# shield Folder 
-Shield/
 
 # keras h5 and data files
 *.keras 
@@ -38,7 +35,7 @@ Shield/
 # no need to send any files created during performance tuning 
 Personal Assistant/
 Personal Assistant/*
-test/*
+test/
 /advanced-python/Chapter_2/data/joblib/*
 /advanced-python/Chapter_1/Particle_Simulation/tests/data/*
 /hands-on-ml/SELF/DATA/Chapter3/spam/ham/*

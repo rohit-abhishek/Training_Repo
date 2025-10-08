@@ -1,6 +1,5 @@
 import base64
 from dataclasses import dataclass, astuple, fields
-import sqlite3
 import os, sys
 import sqlcipher3
 import ttkbootstrap as tkb
@@ -8,11 +7,9 @@ import getpass
 
 from ttkbootstrap.dialogs import Messagebox
 from datetime import datetime, date 
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from threading import local
-from exception_modules import ProcessingException, ValidationException
+from exception_modules import ValidationException
+from control_modules import AuthToken
 
 
 def get_system_location(file_name:str) -> str:
@@ -238,7 +235,7 @@ class KeyGenerator(tkb.Frame):
 
 
     def initialize_gui(self):
-        self.parent.title("Key Generator for Nirnayo Sutra")
+        self.parent.title("Key Generator for GunnaSutra")
         self.pack(side="top", expand=True, fill="both")
 
         # create widget for admin password at the top 
@@ -267,7 +264,7 @@ class KeyGenerator(tkb.Frame):
 
         # create text box for secret message which should be copied and given to other app 
         self.create_secret_message_textbox(row=8, column=0) 
-        self.create_salt_message_textbox(row=9, column=0)
+        self.create_salt_message_entry(row=9, column=0)
 
         # add separator 
         separator=tkb.Separator(self)
@@ -348,16 +345,19 @@ class KeyGenerator(tkb.Frame):
         secret_message_label=tkb.Label(self, text="Secret Message")
         secret_message_label.grid(row=row, column=column, sticky="w", padx=10, pady=10)
 
-        self.secret_message_text=tkb.Text(self, height=5, width=20)
+        self.secret_message_text=tkb.Text(self, height=5, width=20, state="disabled")
         self.secret_message_text.grid(row=row, column=column+1, columnspan=2, sticky="nsew", padx=10, pady=10)
 
 
-    def create_salt_message_textbox(self, row=0, column=0):
+    def create_salt_message_entry(self, row=0, column=0):
         salt_message_label=tkb.Label(self, text="Salt (Hexadecimal Format)")
         salt_message_label.grid(row=row, column=column, sticky="w", padx=10, pady=10)
 
-        self.salt_message_text=tkb.Text(self, height=5, width=20)
-        self.salt_message_text.grid(row=row, column=column+1, columnspan=2, sticky="nsew", padx=10, pady=10)
+        self.salt_message_entry=tkb.Entry(self, state="readonly")
+        self.salt_message_entry.grid(row=row, column=column+1, sticky="nsew", padx=10, pady=10)
+
+        self.salt_message_button=tkb.Button(self, text="Write", state="disabled", command=lambda:self.write_hexadecimal_salt_string(self.salt_message_entry, self.user_entry, self.role_entry, self.secret_message_text))
+        self.salt_message_button.grid(row=row, column=column+2, padx=10, pady=10, sticky="ew")
 
 
     def create_database_retrieve_button(self, row=0, column=0):
@@ -381,7 +381,7 @@ class KeyGenerator(tkb.Frame):
         self.clear_form_button.grid(row=row, column=column, sticky="ew", padx=10, pady=10, ipadx=5)
 
 
-    def retreive_token_details(self, user_widget, role_widget, admin_password_widget):
+    def retreive_token_details(self, user_widget:tkb.Entry, role_widget:tkb.Entry, admin_password_widget:tkb.Entry):
         user_id=user_widget.get()
         role=role_widget.get()
         admin_password=admin_password_widget.get()
@@ -400,8 +400,14 @@ class KeyGenerator(tkb.Frame):
         self.user_entry.delete(0, "end")
         self.role_entry.delete(0, "end")
         # self.user_passphrase_entry.delete(0, "end")
+        self.secret_message_text.configure(state="normal")
+        self.salt_message_entry.configure(state="normal")
         self.secret_message_text.delete("1.0", "end")
-        self.salt_message_text.delete("1.0", "end")
+        self.salt_message_entry.delete(0, "end")
+        self.secret_message_text.configure(state="disabled")
+        self.salt_message_entry.configure(state="readonly")
+
+        self.salt_message_button.configure(state="disabled")
 
 
     def populate_gui(self, admin_record:AdminRecord):
@@ -409,11 +415,21 @@ class KeyGenerator(tkb.Frame):
         self.role_entry.insert("end", admin_record.role)
         self.start_date_calendar.set_date(admin_record.start_date)
         self.end_date_calendar.set_date(admin_record.end_date)
+
+        # enable populate and then disable the output boxes 
+        self.secret_message_text.configure(state="normal")
+        self.salt_message_entry.configure(state="normal")
+
         self.secret_message_text.insert("end", admin_record.secret_message)
-        self.salt_message_text.insert("end", admin_record.salt.hex())
+        self.salt_message_entry.insert("end", admin_record.salt.hex())
+
+        self.secret_message_text.configure(state="disabled")
+        self.salt_message_entry.configure(state="readonly")
+
+        self.salt_message_button.configure(state="normal")
 
 
-    def generate_token(self, start_date_widget, end_date_widget, user_widget, role_widget, admin_password_widget, user_passphrase_widget):
+    def generate_token(self, start_date_widget:tkb.DateEntry, end_date_widget:tkb.DateEntry, user_widget:tkb.Entry, role_widget:tkb.Entry, admin_password_widget:tkb.Entry, user_passphrase_widget:tkb.Entry):
         
         # get the data from the 
         user_id=user_widget.get()
@@ -447,10 +463,11 @@ class KeyGenerator(tkb.Frame):
         
         # if record already exists and valid - return the data else insert the data
         if not valid_record: 
-            key, salt=self.generate_fernet_key_from_passphrase(input_details.passphrase)
-            print("Please Note Salt Value: ", salt)
-            secret_message=self.generate_secret_message(key, input_details)
-            input_details.salt=salt 
+            auth_object=AuthToken()
+            key, salt=auth_object.generate_fernet_key_from_passphrase(input_details.passphrase)
+            message=self.generate_secret_message(input_details)
+            secret_message=auth_object.encrypt_secret_message(key, message)
+            input_details.salt=salt
             input_details.secret_message=secret_message
             input_details.private_key=key
             self.insert_user_details(input_details, admin_password)
@@ -460,56 +477,49 @@ class KeyGenerator(tkb.Frame):
         self.reset_gui_data()
         self.populate_gui(user_details)
 
-
-    def generate_fernet_key_from_passphrase(self, user_passphrase:bytes) -> tuple[bytes, bytes]:
-
-        if isinstance(user_passphrase, str):
-            user_passphrase=user_passphrase.encode() 
-
-        salt=os.urandom(16)
-        kdf=PBKDF2HMAC(
-            algorithm=hashes.SHA256(), 
-            length=32, 
-            salt=salt,
-            iterations=1200000
-        )
-        key=base64.urlsafe_b64encode(kdf.derive(user_passphrase))
-        return key, salt
     
-
-    def get_key_from_passphrase_and_salt(self, user_passphrase, salt):
-        if isinstance(user_passphrase, str):
-            user_passphrase=user_passphrase.encode() 
-        
-        if isinstance(salt, str):
-            salt=bytes.fromhex(salt)
-
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=salt,
-            iterations=1_200_000,
-        )
-        key = base64.urlsafe_b64encode(kdf.derive(user_passphrase))
-        return key
-        
-    
-    def generate_secret_message(self, key, admin_record:AdminRecord):
-        message=f"""{admin_record.user_id} {admin_record.role} {admin_record.get_start_date_str()} {admin_record.get_end_date_str()}""" 
-        crypto_object=Fernet(key)
-        secret_message=crypto_object.encrypt(message.encode())
-        return secret_message
+    def generate_secret_message(self, admin_record:AdminRecord):
+        message=f"{admin_record.user_id} {admin_record.role} {admin_record.get_start_date_str()} {admin_record.get_end_date_str()}"
+        return message
 
 
-    def validate_string_variable(self, string_value, string_label) -> str:
+    def validate_string_variable(self, string_value:str, string_label:str) -> str:
         if not string_value:
             message=f"{string_label} cannot be blank"
             Messagebox.show_error(message)
             raise ValidationException(message)
         
         return string_value.strip()
+    
+    
+    def write_hexadecimal_salt_string(self, salt_widget:tkb.Entry, user_id_widget:tkb.Entry, user_role_widget:tkb.Entry, secret_message_widget:tkb.Text):
+        """ Create a new file in output_data folder with current timestamp as suffix. File naming convention 
+        {user_id}_{role}_{current_timestamp}.key
+        """
+        user_id=user_id_widget.get()
+        user_role=user_role_widget.get()
+        salt=salt_widget.get() 
+        secret_message=secret_message_widget.get("1.0", "end")
+        current_timestamp=datetime.now().strftime("%Y%m%d%H%M%S")
+        folder_name=f"{user_id}_{user_role}_{current_timestamp}"
 
-    def validate_date_variable(self, date_variable, date_label) -> date:
+        # create this in current directory 
+        output_location=os.path.join(os.path.dirname(os.path.abspath(__file__)), "output_data", folder_name)
+        os.makedirs(output_location) if not os.path.exists(output_location) else None 
+        salt_file_name="salt_hexadecimal.data"
+        secret_message_file_name="secret_message.pem"
+
+        # write the salt file 
+        with open(os.path.join(output_location, salt_file_name), "w") as fp:
+            fp.write(salt)
+
+        # write secret message file 
+        with open(os.path.join(output_location, secret_message_file_name), "w") as fp:
+            fp.write(secret_message)
+
+
+
+    def validate_date_variable(self, date_variable:datetime.date, date_label:str) -> date:
         if not date_variable:
             message=f"{date_label} cannot be blank"
             Messagebox.show_error(message)
@@ -517,14 +527,14 @@ class KeyGenerator(tkb.Frame):
         
         return date_variable
         
-    def validate_start_end_date(self, start_date, end_date) -> None:
+    def validate_start_end_date(self, start_date:datetime.date, end_date:datetime.date) -> None:
         if start_date > end_date:
             message=f"Start Date cannot be after End Date"
             Messagebox.show_error(message)
             raise ValidationException(message)
         
     
-    def get_user_database_details(self, admin_password, user_id, role) -> AdminRecord:
+    def get_user_database_details(self, admin_password:str, user_id:str, role:str) -> AdminRecord:
         admin_database=AdminDatabase(admin_password)
         # admin_database.create_database()
         user_details=admin_database.get_user_details(user_id, role) 

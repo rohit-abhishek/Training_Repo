@@ -9,13 +9,16 @@ __pycache__/
 # dont send any PKL files 
 *.pkl
 
+# data files 
+data/*
+
+# log files
+log/*
+
 # dont send any csv file or tgz  or bz2 files 
 *.csv 
 *.tgz
 *.bz2
-
-# specific folder 
-output_data/
 
 # exclude database file 
 *.db

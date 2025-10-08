@@ -1,0 +1,38 @@
+# Configuration for application. This cannot be modifed by user using GUI. 
+# Any changes made to this file will require application restart for changes to take effect 
+
+application_control_data:
+  version: 0.0.1
+  author: "Rohit Abhishek"
+  workspace_location: ""
+  logging_level: "INFO"
+  application_name: "GunnaSutra"
+
+application_folders: 
+  data_folder: "data"
+  template_folder: "templates"
+  image_folder: "images"
+  sql_folder: "sqls"
+
+application_user_interface:
+  default_theme: "yeti"
+  window_resizable: true 
+  window_relief: "sunken"
+  window_horizontal_margin: 0 
+  window_vertical_marging: 150
+
+application_services:
+  service_port: 5000
+
+application_database: 
+  database_type: "MySQL Database"        # Azure SQL Database
+  database_host: "localhost"
+  database_port: 3306 
+  database_name: "Gunnasutra"
+
+application_cloud:
+  provider: "aws"
+  profile_accounts:
+    - ""
+    - ""
+    

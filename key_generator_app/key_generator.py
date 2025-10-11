@@ -80,6 +80,10 @@ class AdminRecord:
         if isinstance(self.end_date, date):
             return datetime.strftime(self.end_date, "%Y-%m-%d")
         return self.end_date
+    
+
+    def get_field_names(self):
+        return [field.name for field in fields(self)]
 
 
 class AdminSqlBuilder:

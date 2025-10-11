@@ -22,7 +22,14 @@ class MainWindow(qtw.QWidget):
         self.layout().addWidget(my_label)
 
         # add combo box (editable=True will make the combo editable. Click enter to add the new item to the combobox)
-        my_text=qtw.QTextEdit(self, lineWrapMode=qtw.QTextEdit.LineWrapMode.FixedColumnWidth, lineWrapColumnOrWidth=50, placeholderText="Hello World!", readOnly=False)
+        my_text=qtw.QTextEdit(self, 
+                              acceptRichText=True, 
+                              lineWrapMode=qtw.QTextEdit.LineWrapMode.FixedColumnWidth, 
+                              lineWrapColumnOrWidth=50,             # Number of characters in single line for wrapping the text
+                              placeholderText="Hello World!",       # Goes away as soon as you start typing
+                            #   plainText="This is real text",      # Real text. Does not go away 
+                              html="<h1> this is header block </h1>",       # You can insert html as well to text box
+                              readOnly=False)
         self.layout().addWidget(my_text)
 
         # Let's create a button

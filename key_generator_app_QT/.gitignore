@@ -6,23 +6,46 @@ __pycache__/
 # C extensions
 *.so
 
+# dont send any PKL files 
+*.pkl
+
+# dont send any csv file or tgz  or bz2 files 
+*.csv 
+*.tgz
+*.bz2
+
+# specific folder 
+output_data/
+
+# exclude database file 
+*.db
+
 # keras h5 and data files
 *.keras 
 *.h5 
 *.data
+*.dot
+*.jpeg
+*.jpg
+*.model
+*.json
+*.gz
+*.tflite
 *.tfrecord
-
-*.desc 
-*.proto 
+*.tfrecord*
 
 
-# Keras tuner trials 
-Keras_Tuner_Output/
+# no need to send any files created during performance tuning 
+Personal Assistant/
+Personal Assistant/*
+test/
+/advanced-python/Chapter_2/data/joblib/*
+/advanced-python/Chapter_1/Particle_Simulation/tests/data/*
+/hands-on-ml/SELF/DATA/Chapter3/spam/ham/*
+/hands-on-ml/SELF/DATA/Chapter3/spam/spam/*
 
-# Tensorboard logs
-Tensorboard_Logs/
 tensorboard_logs/
-
+Tensorboard_Logs/
 
 # Distribution / packaging
 .Python
@@ -198,5 +221,3 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-
-.pkl

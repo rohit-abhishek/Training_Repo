@@ -13,9 +13,10 @@ import ttkbootstrap as tkb
 from utility_modules import utilities
 from utility_modules.contants import SETUP_CONFIGURATION
 from user_interface_modules import SplashScreen, ControlSettings, CustomTopLevel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 
 
-class ApplicationBuilder(tkb.Window):
+class ApplicationBuilder():
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -26,6 +27,7 @@ class ApplicationBuilder(tkb.Window):
 
     def initialize_application(self):
         self.splash=SplashScreen(self)
+        self.splash.show()
 
         self.splash.update_initialization_status()
 
@@ -45,17 +47,17 @@ class ApplicationBuilder(tkb.Window):
         self.setup_logging()
 
         # Apply theme 
-        default_theme=self.setup_configuration.application_user_interface.default_theme
-        self.style_name=tkb.Style()
-        self.theme_names=self.style_name.theme_names() 
-        self.theme_names.sort() 
-        self.style_name.theme_use(default_theme)            
+        # default_theme=self.setup_configuration.application_user_interface.default_theme
+        # self.style_name=tkb.Style()
+        # self.theme_names=self.style_name.theme_names() 
+        # self.theme_names.sort() 
+        # self.style_name.theme_use(default_theme)            
 
         # now add the user prompt for user to enter userid and passphrase
         self.splash.update_ready_status()
         self.valid_credentials=False 
-        self.authentication=ControlSettings(self.get_user_auth_flag)
-        self.splash.root.wait_window()
+        # self.authentication=ControlSettings(self.get_user_auth_flag)
+        # self.splash.root.wait_window()
 
 
 
@@ -89,13 +91,13 @@ class ApplicationBuilder(tkb.Window):
         self.splash.close_splash_screen()
 
 
-    def run(self):
-        self.mainloop()
-
 
 if __name__=="__main__":
+    app=QApplication(sys.argv)
+
     try:
-        a=ApplicationBuilder() 
-        a.run()
+        gunnasutra=ApplicationBuilder() 
     except Exception as e:
         logging.error(f"Falied to start application: {e}", exc_info=False)
+
+    sys.exit(app.exec())

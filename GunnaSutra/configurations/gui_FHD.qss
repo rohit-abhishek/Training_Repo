@@ -1,0 +1,6 @@
+/* Style a QLabel with the object name "titleLabel" */
+QLabel#titleLabel {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333333;
+}

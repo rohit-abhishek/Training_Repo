@@ -3,90 +3,113 @@ import yaml
 from datetime import datetime
 
 class Config:
-    def __init__(self, data):
+    def __init__(self, data:dict):
         for key, value in data.items():
             if isinstance(value, dict):
-                setattr(self, key, Config(value)) # Recursively create nested objects
+                setattr(self, key, Config(value))
             else:
                 setattr(self, key, value)
 
 
-def get_system_location(file_name:str, folder_location:str=None) -> str:
-    """ scan system path for required file name """
+class SetupConfig:
+    def __init__(self, setup_config_location):
+        self.setup_config_location=setup_config_location
 
-    return_location=None 
+    def get_configuration_data(self):
+        with open(self.setup_config_location, "r") as fp:
+            data=yaml.safe_load(fp)
+            config_data=Config(data)
+            return config_data
+    
+    # Below will not create heirarchy in key chain
+    # def load_config_data(self, data):
+    #     for key, value in data.items():
+    #         if isinstance(value, dict):
+    #             setattr(self, key, self.load_config_data(value)) # Recursively create nested objects
+    #         else:
+    #             setattr(self, key, value)
 
-    # If folder location present 
-    if folder_location:
-        if os.path.exists(os.path.join(folder_location, file_name)):
-            return_location=os.path.join(folder_location, file_name)
+
+class Workspace:
+    def __init__(self, workspace_directory, application_name:str="Gunnasutra", workspace_folder_name:str=datetime.now().strftime("%Y%m%d%H%M%S")):
+        self.workspace_directory=workspace_directory
+        self.application_name=application_name
+        self.workspace_folder_name=workspace_folder_name
+        self.workspace_location=None 
+    
+    def get_workspace_location(self):
+        # check if workspace location provided
+        if not self.workspace_directory:
+            self.workspace_directory=os.path.expanduser("~/Documents")
+
+        self.workspace_location=os.path.join(self.workspace_directory, self.application_name, self.workspace_folder_name)
+        os.makedirs(self.workspace_location, exist_ok=True)
+        return self.workspace_location
+    
+    def create_subfolders(self, subfolder_name):
+        if not subfolder_name:
+            subfolder_name="default"
+        
+        if os.path.exists(self.workspace_location, subfolder_name):
+            orig_location=os.path.join(self.workspace_location, subfolder_name)
+            new_location=os.path.join(self.workspace_directory, f"Backup_{subfolder_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}")
+            os.rename(orig_location, new_location)
+
+        subfolder_location=os.path.join(self.workspace_location, subfolder_name)
+        os.makedirs(subfolder_location)
+        return subfolder_location
+    
+
+class FileLocator:
+    def __init__(self, file_name:str, folder_location:str=None):
+        self.file_name=file_name 
+        self.folder_location=folder_location
+        self.default_level=2
+
+    def get_level_up_location(self, folder_location):
+        new_location=folder_location
+        for i in range(0, self.default_level):
+            new_location=os.path.dirname(new_location)
+        return new_location
+    
+    def get_system_location(self):
+        if self.folder_location:
+            return self.scan_folder_location(self.folder_location)
+        
+        # check in sys.executable folder 
+        folder_location=os.path.dirname(sys.executable)
+        folder_path=self.scan_folder_location(folder_location)
+        if folder_path:
+            return folder_path
+
+        # check in current working directory folder 
+        folder_location=os.path.dirname(os.path.abspath(__file__))
+        folder_path=self.scan_folder_location(folder_location)
+        if folder_path:
+            return folder_path
+        
+        # check in sys.executable levels above
+        root_location=sys.executable
+        folder_location=self.get_level_up_location(root_location)
+        folder_path=self.scan_folder_location(folder_location)
+        if folder_path:
+            return folder_path
+        
+        # finally check in current folder x levels up 
+        root_location=os.path.dirname(os.path.abspath(__file__))
+        folder_location=self.get_level_up_location(root_location)
+        folder_path=self.scan_folder_location(folder_location)
+        if folder_path:
+            return folder_path
+
+    def scan_folder_location(self, folder_location):
+        return_location=None 
+
+        if os.path.exists(os.path.join(folder_location, self.file_name)):
+            return_location=os.path.join(folder_location, self.file_name)
             return return_location
         
         for root, dirs, files in os.walk(folder_location):
-            if file_name in files: 
-                return_location=os.path.join(root, file_name)
-                return return_location 
-
-    # If folder location not present
-    elif os.path.exists(os.path.join(os.path.dirname(sys.executable), file_name)):
-        return_location=os.path.join(os.path.dirname(sys.executable), file_name) 
-        return return_location
-        
-    elif os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), file_name)):
-        return_location=os.path.join(os.path.dirname(os.path.abspath(__file__)), file_name)
-        return return_location
-        
-    else:
-        root=os.path.dirname(os.path.abspath(__file__))
-        root_path=get_level_up_location(root, level=2)
-        # root_path=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        for root, dirs, files in os.walk(root_path):
-            if file_name in files: 
-                return_location=os.path.join(root, file_name)
-                return return_location 
-
-        # still not found then scan through sys.executable location 
-        root=sys.executable
-        root_path=get_level_up_location(root, level=2)
-        # root_path=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(sys.executable))))
-        for root, dirs, files in os.walk(root_path):
-            if file_name in files: 
-                return_location=os.path.join(root, file_name)
-                return return_location
-    
-    return return_location 
-
-
-def get_level_up_location(location, level=2):
-    new_location=location
-    for i in range(0, level):
-        new_location=os.path.dirname(new_location)
-
-    return new_location
-
-def get_setup_configuration(configuration_location):
-    # load the setup_configuration.yaml 
-    setup_config=None 
-    with open(configuration_location, "r") as fp:
-        data=yaml.safe_load(fp)
-        setup_config=Config(data)
-    return setup_config
-
-
-def create_workspace(workspace_location, application_name):
-    """ create workspace """
-
-    current_timestamp=datetime.now().strftime("%Y%m%d%H%M%S")
-    workspace_= None 
-
-    # if workspace provided then create directories and send the location 
-    if workspace_location and workspace_location!="":
-        if not os.path.exists(workspace_location):
-            workspace_=os.path.join(workspace_location, application_name, current_timestamp)
-            os.makedirs(workspace_)
-            return workspace_
-    
-    root=os.path.expanduser("~/Documents")
-    workspace_location=os.path.join(root, application_name, current_timestamp)
-    os.makedirs(workspace_location)
-    return workspace_location
+            if self.file_name in files: 
+                return_location=os.path.join(root, self.file_name)
+                return return_location                 

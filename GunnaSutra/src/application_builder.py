@@ -10,9 +10,9 @@ import sys, os
 import logging
 import time 
 import ttkbootstrap as tkb
-from utility_modules import utilities
+from utility_modules.utilities import FileLocator, Workspace, SetupConfig
 from utility_modules.contants import SETUP_CONFIGURATION
-from user_interface_modules import SplashScreen, ControlSettings, CustomTopLevel
+from user_interface_modules import SplashScreen, UserCredentials
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 
 
@@ -20,51 +20,60 @@ class ApplicationBuilder():
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # set up splash screen for user to wait while performing below operations 
-        self.initialize_application()
-        print("Back to initialization")
-
-
-    def initialize_application(self):
-        self.splash=SplashScreen(self)
+        # first off create splash screen for user to see the progress 
+        self.splash=SplashScreen()
         self.splash.show()
 
-        self.splash.update_initialization_status()
+        # initialize the splash screen 
+        self.initialize_splash_screen()
 
-        # get the setup configuration 
-        self.splash.update_configuration_status()
-        self.configuration_location=utilities.get_system_location(file_name=SETUP_CONFIGURATION)
-        self.setup_configuration=utilities.get_setup_configuration(self.configuration_location) 
+        # get the application configurations 
+        self.get_configurations()
 
-        # set up workspace
-        self.splash.update_workspace_status()
-        workspace_location=self.setup_configuration.application_control_data.workspace_location
-        application_name=self.setup_configuration.application_control_data.application_name
-        self.workpsace_location=utilities.create_workspace(workspace_location, application_name)
+        # set up application workspace 
+        self.create_workspace()
 
         # create logging handles 
+        self.create_logging_handles()
+
+        # prompt user to enter credentials 
+        self.enter_login_credentials()
+
+
+    def initialize_splash_screen(self):
+        # Show intialization message
+        self.splash.update_initialization_status()
+
+
+    def get_configurations(self):
+
+        # update splash screen message
+        self.splash.update_configuration_status()
+
+        config_locator=FileLocator(SETUP_CONFIGURATION)
+        self.config_location=config_locator.get_system_location()
+        
+        # load the configurations 
+        setup_config_object=SetupConfig(self.config_location)
+        self.config_data=setup_config_object.get_configuration_data()
+
+
+    def create_workspace(self):
+        self.splash.update_workspace_status()
+
+        # get workspace location and application name 
+        workspace_directory=self.config_data.application_control_data.workspace_location 
+        application_name=self.config_data.application_control_data.application_name
+
+        # create workspace object 
+        self.workspace_object=Workspace(workspace_directory, application_name)
+        self.workpsace_location=self.workspace_object.get_workspace_location()
+
+
+    def create_logging_handles(self):
         self.splash.update_logging_status()
-        self.setup_logging()
 
-        # Apply theme 
-        # default_theme=self.setup_configuration.application_user_interface.default_theme
-        # self.style_name=tkb.Style()
-        # self.theme_names=self.style_name.theme_names() 
-        # self.theme_names.sort() 
-        # self.style_name.theme_use(default_theme)            
-
-        # now add the user prompt for user to enter userid and passphrase
-        self.splash.update_ready_status()
-        self.valid_credentials=False 
-        # self.authentication=ControlSettings(self.get_user_auth_flag)
-        # self.splash.root.wait_window()
-
-
-
-    def setup_logging(self):
-
-        # get default log level 
-        log_level_str=self.setup_configuration.application_control_data.logging_level
+        log_level_str=self.config_data.application_control_data.logging_level
         log_level=logging._nameToLevel.get(log_level_str, 0)
 
         logging.basicConfig(
@@ -78,6 +87,17 @@ class ApplicationBuilder():
         self.logger.info("Application Initialized")
         if log_level != logging.DEBUG: 
             sys.tracebacklimit=0
+        
+
+    def enter_login_credentials(self):
+        self.splash.update_ready_status()
+
+        # bring up login screen for user to enter credentials 
+        self.user_login=UserCredentials(self)
+        self.user_login.show()
+        self.user_login.raise_() 
+        self.user_login.activateWindow()
+        
 
 
     def get_user_auth_flag(self, valid_credentials):

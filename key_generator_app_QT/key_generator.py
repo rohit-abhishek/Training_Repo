@@ -2,15 +2,12 @@
 
 from datetime import datetime, date
 import sys, os 
-import sqlcipher3
-import getpass 
-
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QTextEdit, QRadioButton, QStatusBar, QDateEdit, QTableView, QMessageBox, QHeaderView
 from PyQt6.QtGui import QStandardItem, QStandardItemModel
 from PyQt6 import uic 
 from PyQt6.QtCore import QDate
 from utilities import utility
-from utilities.utility import AdminDatabase, AdminRecord, AdminSqlBuilder
+from utilities.utility import AdminDatabase, AdminRecord
 from exception_modules import ValidationException
 from control_modules import AuthToken
 
@@ -57,7 +54,7 @@ class KeyGenerator(QMainWindow):
         # get the start and end dates 
         self.startDate_date=self.findChild(QDateEdit, "startDate")
         self.endDate_date=self.findChild(QDateEdit, "endDate")
-
+        
         # get the user passphrase 
         self.userPassphrase_line=self.findChild(QLineEdit, "userPassphrase")
 
@@ -308,7 +305,7 @@ class KeyGenerator(QMainWindow):
             )
             raise ValidationException(message)
         
-        print(date_variable, type(date_variable), type(date_variable.toPyDate()))
+        # print(date_variable, type(date_variable), type(date_variable.toPyDate()))
         return date_variable.toPyDate()
     
 

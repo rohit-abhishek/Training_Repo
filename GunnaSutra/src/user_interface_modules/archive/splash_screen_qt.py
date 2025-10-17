@@ -3,7 +3,7 @@ import time
 import logging
 from enum import Enum
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QThread
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QFrame
 )
@@ -84,35 +84,43 @@ class SplashScreen(QMainWindow):
 
     def update_initialization_status(self):
         self.update_status(StatusMessage.INITIALIZATION.value)
+        QThread.sleep(1)
         # time.sleep(self.wait_time)
 
     def update_configuration_status(self):
         self.update_status(StatusMessage.CONFIGURATION.value)
+        QThread.sleep(1)
         # time.sleep(self.wait_time)
 
     def update_workspace_status(self):
         self.update_status(StatusMessage.WORKSPACE.value)
+        QThread.sleep(1)
         # time.sleep(self.wait_time)
 
     def update_logging_status(self):
         self.update_status(StatusMessage.LOGGING.value)
+        QThread.sleep(1)
         # time.sleep(self.wait_time)
 
     def update_ready_status(self):
         self.update_status(StatusMessage.READY.value)
         self.ready = True
+        QThread.sleep(1)
         # time.sleep(self.wait_time)
 
     def update_authentication_successful(self):
         self.update_status(StatusMessage.SUCCESSFUL.value)
+        QThread.sleep(1)
         # time.sleep(self.wait_time)
 
     def update_application_window(self):
         self.update_status(StatusMessage.MAIN.value)
+        QThread.sleep(1)
         # time.sleep(self.wait_time)
 
     def update_error_status(self):
         self.update_status(StatusMessage.ERROR.value)
+        QThread.sleep(1)
         # time.sleep(self.wait_time)
 
     def close_splash_screen(self):

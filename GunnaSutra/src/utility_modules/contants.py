@@ -6,6 +6,11 @@ SETUP_CONFIGURATION="setup_configuration.yaml"
 SALT_FILE_NAME="salt_hexadecimal.data"
 SECRET_FILE_NAME="secret_message.pem"
 
+QSS_1K_FILE="gui_HD.qss"
+QSS_2K_FILE="gui_FHD.qss"
+QSS_3K_FILE="gui_QHD.qss"
+QSS_4K_FILE="gui_UHD.qss"
+
 
 MESSAGE_LOOKUP={
     "ERRMSG001": "No Authorization Files Found.", 
@@ -21,5 +26,11 @@ MESSAGE_LOOKUP={
     "ERRMSG011": "User ID not provided.", 
     "ERRMSG012": "Passphrase not provided.",
     "ERRMSG013": "Unable to encrypt secret message. Please investigate.",
-    "ERRMSG014": "Unable to decrypt secret message. Please investigate."
+    "ERRMSG014": "Unable to decrypt secret message. Please investigate.",
+    "ERRMSG015": "Unable to find UI screens",
+    "ERRMSG016": "Key not Valid"
+}
+
+UI_MODULE_LOOKUP={
+    "user_login": "gunnasutra.ui"
 }

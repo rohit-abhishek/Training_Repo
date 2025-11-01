@@ -1,3 +1,5 @@
+# Github's default gitignore for Python
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -5,50 +7,6 @@ __pycache__/
 
 # C extensions
 *.so
-
-# dont send any PKL files 
-*.pkl
-
-# dont send any csv file or tgz  or bz2 files 
-*.csv 
-*.tgz
-*.bz2
-
-# db files 
-*.db
-
-# shield Folder 
-Shield/
-Archive/
-Deep_Learning_Glassner/Glassner_Github_Repo/
-advanced-python/Advance Python Examples/
-
-# keras h5 and data files
-*.keras 
-*.h5 
-*.data
-*.dot
-*.jpeg
-*.jpg
-*.model
-*.json
-*.gz
-*.tflite
-*.tfrecord
-*.tfrecord*
-
-
-# no need to send any files created during performance tuning 
-Personal Assistant/
-Personal Assistant/*
-test/*
-/advanced-python/Chapter_2/data/joblib/*
-/advanced-python/Chapter_1/Particle_Simulation/tests/data/*
-/hands-on-ml/SELF/DATA/Chapter3/spam/ham/*
-/hands-on-ml/SELF/DATA/Chapter3/spam/spam/*
-
-tensorboard_logs/
-Tensorboard_Logs/
 
 # Distribution / packaging
 .Python
@@ -69,15 +27,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
-# OS generated files 
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -109,6 +58,7 @@ cover/
 *.pot
 
 # Django stuff:
+*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -146,12 +96,6 @@ ipython_config.py
 #   install all needed dependencies.
 #Pipfile.lock
 
-# UV
-#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#uv.lock
-
 # poetry
 #   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
@@ -164,10 +108,8 @@ ipython_config.py
 #pdm.lock
 #   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
 #   in version control.
-#   https://pdm.fming.dev/latest/usage/project/#working-with-version-control
+#   https://pdm.fming.dev/#use-with-ide
 .pdm.toml
-.pdm-python
-.pdm-build/
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
@@ -187,6 +129,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+llms/
+llms.bak/
 
 # Spyder project settings
 .spyderproject
@@ -213,14 +157,48 @@ dmypy.json
 cython_debug/
 
 # PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+.idea/
 
-# Ruff stuff:
-.ruff_cache/
+# Added this to ignore models downloaded from HF
+model_cache/
+# Ignore finder files
+.DS_Store
+/.DS_Store
 
-# PyPI configuration file
-.pypirc
+# Ignore Chroma vector database
+vector_db/
+products_vectorstore/
+
+# And ignore any pickle files made during the course
+*.pkl
+
+# ignore gradio private files
+.gradio
+/.gradio
+
+# ignore diagnostics reports
+**/report.txt
+
+# ignore optimized C++ code from being checked into repo
+week4/optimized
+week4/simple
+*.env.save
+.virtual_documents/
+WingIDE_Projekti/
+nohup.out
+*.png
+
+scraper_cache/
+challenge/
+
+# WandB local sync data.
+wandb/
+
+week2/prices.db
+week4/main.cpp
+week4/main
+week4/main.exe
+week4/main.rs
+
+local/
+
